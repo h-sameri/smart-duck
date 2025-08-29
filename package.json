@@ -1,0 +1,27 @@
+{
+  "scripts": {
+    "db:generate": "bun run data/migrations/generate.ts",
+    "db:migrate": "bun run data/migrations/migrate.ts",
+    "db:push": "bun db:generate; bun db:migrate",
+    "server:dev": "bun run src/server/index.ts --watch",
+    "client:dev": "cd src/client && bun dev",
+    "client:build": "cd src/client && bun run build",
+    "client:start": "cd src/client && bun start",
+    "start": "bun run src/server/index.ts",
+    "telegram": "bun run src/telegram/index.ts"
+  },
+  "workspaces": [
+    "./evm",
+    "./src/client"
+  ],
+  "dependencies": {
+    "@google/genai": "^1.15.0",
+    "alith": "^0.12.1",
+    "grammy": "^1.38.1",
+    "zod": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.20",
+    "@types/json-schema": "^7.0.15"
+  }
+}
