@@ -128,7 +128,7 @@ bot.callbackQuery("help_resources", async (ctx) => {
     `• Documentation, guides, and tutorials\n\n` +
     `💻 **GitHub Codebase:** [github.com/h-sameri/smart-duck](https://github.com/h-sameri/smart-duck)\n` +
     `• Open source code and contributions\n\n` +
-    `📺 **Watch Demo:** [Youtube Link](https://youtu.be/)\n`;
+    `📺 **Watch Demo:** [Youtube Link](https://youtu.be/x9dX_JgCdJI)\n`;
   const keyboard = new InlineKeyboard()
     .text("🔙 Back to Menu", "back_to_menu");
   await ctx.reply(message, { reply_markup: keyboard, parse_mode: "Markdown" });
@@ -1265,7 +1265,7 @@ bot.callbackQuery("help_resources", async (ctx) => {
     `• Documentation, guides, and tutorials\n\n` +
     `💻 **GitHub Codebase:** [github.com/](https://github.com/)\n` +
     `• Open source code and contributions\n\n` +
-    `📺 **Watch Demo:** [Youtube Link](https://youtu.be/)\n`;
+    `📺 **Watch Demo:** [Youtube Link](https://youtu.be/x9dX_JgCdJI)\n`;
 
   const keyboard = new InlineKeyboard()
     .text("🔙 Back to Menu", "back_to_menu");

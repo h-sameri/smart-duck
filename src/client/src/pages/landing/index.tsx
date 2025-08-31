@@ -48,7 +48,7 @@ export default function HomePage() {
                                         </Link>
                                     </Button>
                                     <Button variant="link" size="lg" className="w-full sm:w-auto" asChild>
-                                        <a href="https://youtu.be/" target="_blank" rel="noopener noreferrer">
+                                        <a href="https://youtu.be/x9dX_JgCdJI" target="_blank" rel="noopener noreferrer">
                                             watch demo
                                         </a>
                                     </Button>   
