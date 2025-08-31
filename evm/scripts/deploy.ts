@@ -6,7 +6,7 @@ import { Chain } from "viem";
 import CaretOrchestrator from "../artifacts/src/CaretOrchestrator.sol/CaretOrchestrator.json";
 import CaretEscrow from "../artifacts/src/CaretEscrow.sol/CaretEscrow.json";
 import USDT from "../artifacts/src/usdt.sol/USDT.json";
-import TestToken from "../artifacts/src/TestToken.sol/TestToken.json";
+import Token from "../artifacts/src/Token.sol/Token.json";
 import { tokens } from "../../src/bot/tokens";
 
 const networkArg = Bun.argv[2];
@@ -84,8 +84,8 @@ async function main() {
   if (!viem.isHex(USDT.bytecode))
     throw new Error("USDT bytecode is missing or invalid");
 
-  if (!viem.isHex(TestToken.bytecode))
-    throw new Error("TestToken bytecode is missing or invalid");
+  if (!viem.isHex(Token.bytecode))
+    throw new Error("Token bytecode is missing or invalid");
 
   const serverAddress = client.account.address;
 
@@ -124,8 +124,8 @@ async function main() {
     `CaretOrchestrator deployed at: ${orchestratorReceipt.contractAddress}`
   );
 
-  console.log("\nDeploying test tokens...");
-  const testTokens: Record<
+  console.log("\nDeploying tokens...");
+  const allTokens: Record<
     string,
     {
       abi: any;
@@ -134,15 +134,15 @@ async function main() {
   > = {};
 
   for (const token of tokens) {
-    const testTokenName = `${token.name}`;
-    const testTokenSymbol = token.symbol;
+    const tokenName = `${token.name}`;
+    const tokenSymbol = token.symbol;
 
-    console.log(`Deploying ${testTokenName} (${testTokenSymbol})...`);
+    console.log(`Deploying ${tokenName} (${tokenSymbol})...`);
 
     const tokenHash = await client.deployContract({
-      abi: TestToken.abi,
-      bytecode: TestToken.bytecode,
-      args: [testTokenName, testTokenSymbol, usdtReceipt.contractAddress],
+      abi: Token.abi,
+      bytecode: Token.bytecode,
+      args: [tokenName, tokenSymbol, usdtReceipt.contractAddress],
       chain: getChain() as Chain,
     });
 
@@ -151,14 +151,14 @@ async function main() {
     });
 
     if (!tokenReceipt.contractAddress)
-      throw new Error(`${testTokenSymbol} deployment failed`);
+      throw new Error(`${tokenSymbol} deployment failed`);
 
     console.log(
-      `${testTokenSymbol} deployed at: ${tokenReceipt.contractAddress}`
+      `${tokenSymbol} deployed at: ${tokenReceipt.contractAddress}`
     );
 
-    testTokens[testTokenSymbol] = {
-      abi: TestToken.abi,
+    allTokens[tokenSymbol] = {
+      abi: Token.abi,
       address: tokenReceipt.contractAddress,
     };
   }
@@ -177,14 +177,14 @@ async function main() {
     address: usdtReceipt.contractAddress,
   };
 
-  definitions.tokens = testTokens;
+  definitions.tokens = allTokens;
 
   console.log("\nDeployment Summary:");
   console.log("===================");
   console.log(`USDT: ${usdtReceipt.contractAddress}`);
   console.log(`CaretOrchestrator: ${orchestratorReceipt.contractAddress}`);
   console.log(`Server address: ${serverAddress}`);
-  console.log(`Test Tokens deployed: ${Object.keys(testTokens).length}`);
+  console.log(`Tokens deployed: ${Object.keys(tokens).length}`);
 }
 
 main()

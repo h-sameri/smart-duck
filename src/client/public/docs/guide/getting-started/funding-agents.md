@@ -1,12 +1,5 @@
 # Funding Your Trading Agent
 
-## 🚀 Quick Start - Get Test Tokens
-
-**Currently deployed on DuckChain Mainnet with real tokens available to trade. We provide USDT - no real money involved.**
-
-1. **USDT Faucet**: https://smartduck.hetairoi.xyz/faucet
-2. **DuckChain Faucet**: https://docs.duckchain.io/learn/faucet
-
 ## USDT Funding Process
 
 Before your agent can trade, you need to fund its escrow contract with USDT:
@@ -31,7 +24,6 @@ Address: 0x742d35Cc6535C0532925a3b8D93632...
 ⚠️ Important:
 - Only send USDT on DuckChain Mainnet
 - Double-check the address
-- Minimum funding: 10 USDT
 
 [Copy Address] [Check Balance] [Help]
 ```
@@ -51,7 +43,7 @@ Address: 0x742d35Cc6535C0532925a3b8D93632...
 ## Funding Requirements
 
 ### Minimum Funding
-- **Minimum Amount**: 10 USDT per agent
+- **Minimum Amount**: 1 USDT per agent
 - **Recommended Starting**: 50-100 USDT for testing
 - **Production Trading**: 500+ USDT for serious trading
 

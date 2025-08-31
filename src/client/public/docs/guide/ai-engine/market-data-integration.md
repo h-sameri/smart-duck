@@ -2,7 +2,13 @@
 
 ## CoinGecko API Integration
 
-The system integrates with CoinGecko's API to provide real-time and historical market data for comprehensive analysis.
+The system integrates with CoinGecko's API to provide real-time and historical market data for comprehensive analysis. This integration serves as the foundation for all AI-driven trading decisions, enabling the system to understand market trends, volatility patterns, and token performance.
+
+### Integration Overview
+
+The CoinGecko API integration is designed to fetch both historical and real-time market data for cryptocurrency tokens. It provides essential metrics including price movements, trading volumes, and market capitalization that are crucial for technical analysis and AI decision-making.
+
+### Data Structure
 
 ```typescript
 interface PriceDataPoint {
@@ -11,7 +17,17 @@ interface PriceDataPoint {
   volume: number;
   market_cap: number;
 }
+```
 
+Each `PriceDataPoint` represents a single data point in the time series with:
+- `timestamp`: Unix timestamp of when the data was recorded
+- `price`: Current price in USD
+- `volume`: Trading volume for the period
+- `market_cap`: Market capitalization at that point in time
+
+### Core Implementation
+
+```typescript
 async getPriceHistory(symbol: string, days: number): Promise<PriceHistoryResult> {
   // Check cache first
   const cached = getCachedPriceHistory(symbol, days);
@@ -34,16 +50,25 @@ async getPriceHistory(symbol: string, days: number): Promise<PriceHistoryResult>
 }
 ```
 
+The `getPriceHistory` function implements a two-tier caching strategy to optimize performance:
+1. **Cache Check**: First checks if the requested data is already cached and not expired
+2. **API Fetch**: If not cached or expired, fetches fresh data from CoinGecko API
+3. **Data Processing**: Processes raw API response into standardized format
+4. **Cache Update**: Stores processed data in cache for future requests
+
 ### Market Data Features
-- **Real-Time Prices**: Current market prices with minimal latency
-- **Historical Analysis**: 7-day price history for trend analysis
-- **Volume Data**: Trading volume for liquidity assessment
-- **Market Cap**: Token valuation metrics
-- **Intelligent Caching**: 5-minute cache duration for optimal performance
+- **Real-Time Prices**: Current market prices with minimal latency, essential for immediate trading decisions
+- **Historical Analysis**: 7-day price history for trend analysis and pattern recognition
+- **Volume Data**: Trading volume for liquidity assessment and identifying significant market movements
+- **Market Cap**: Token valuation metrics for understanding relative token importance in the ecosystem
+- **Intelligent Caching**: 5-minute cache duration for optimal performance while maintaining data freshness
 
 ## Performance Optimization
 
 ### Advanced Caching System
+
+The caching system is designed to minimize API calls while ensuring data freshness. It implements a multi-layered approach that includes both immediate cache checks and background refresh mechanisms.
+
 ```typescript
 // Advanced caching system
 class MarketDataCache {
@@ -54,7 +79,7 @@ class MarketDataCache {
     const priorityTokens = ["TON", "WBTC", "WETH", "USDT"];
     
     // Parallel data fetching
-    const promises = priorityTokens.map(token => 
+    const promises = priorityTokens.map(token =>
       this.fetchAndCache(token, 7)
     );
     
@@ -64,7 +89,7 @@ class MarketDataCache {
   async backgroundRefresh(): Promise<void> {
     // Refresh stale data in background
     for (const symbol of this.backgroundQueue) {
-      setTimeout(() => this.refreshToken(symbol), 
+      setTimeout(() => this.refreshToken(symbol),
         Math.random() * 10000 // Stagger requests
       );
     }
@@ -72,7 +97,15 @@ class MarketDataCache {
 }
 ```
 
+The `MarketDataCache` class implements several key optimization strategies:
+- **Warm Cache Initialization**: The `warmEssentialCache()` method pre-loads data for high-priority tokens to ensure immediate availability
+- **Background Refresh**: The `backgroundRefresh()` method maintains data freshness by periodically refreshing cached data without blocking user requests
+- **Staggered Requests**: Randomized delays in background refresh prevent API rate limiting issues
+
 ### Cache Management
+
+The cache management system ensures efficient storage and retrieval of market data with proper expiration handling.
+
 ```typescript
 interface CachedData {
   data: PriceDataPoint[];
@@ -96,9 +129,18 @@ function getCachedPriceHistory(symbol: string, days: number): CachedData | null 
 }
 ```
 
+The cache management functions provide:
+- **Expiration Handling**: Automatic cache invalidation based on time-to-live (TTL) values
+- **Key Management**: Unique keys for different token and time period combinations
+- **Efficient Retrieval**: Fast lookup of cached data with expiration checks
+```
+
 ## Data Processing
 
 ### Market Data Processing
+
+The market data processing pipeline transforms raw CoinGecko API responses into standardized, usable formats for AI analysis. This ensures consistency across different data sources and provides the structured data needed for technical indicators and machine learning models.
+
 ```typescript
 function processMarketData(rawData: any): PriceDataPoint[] {
   const { prices, total_volumes, market_caps } = rawData;
@@ -112,7 +154,16 @@ function processMarketData(rawData: any): PriceDataPoint[] {
 }
 ```
 
+The `processMarketData` function:
+- Extracts timestamp and price from the CoinGecko API's prices array
+- Maps corresponding volume and market cap data to each price point
+- Handles missing data gracefully by defaulting to zero values
+- Returns a standardized array of `PriceDataPoint` objects
+
 ### Technical Indicators
+
+Technical indicators are essential for AI-driven trading decisions. They provide quantitative measures that help identify trends, momentum, and potential entry/exit points.
+
 ```typescript
 function calculateTechnicalIndicators(data: PriceDataPoint[]) {
   return {
@@ -131,6 +182,14 @@ function calculateSMA(data: PriceDataPoint[], period: number): number {
   const sum = recent.reduce((acc, point) => acc + point.price, 0);
   return sum / period;
 }
+```
+
+Key technical indicators implemented:
+- **SMA (Simple Moving Average)**: Smooths price data to identify trends over different periods (7 and 14 days)
+- **Volatility**: Measures price fluctuations to assess risk
+- **Momentum**: Indicates the strength of price movements
+- **RSI (Relative Strength Index)**: Identifies overbought/oversold conditions
+- **Support/Resistance Levels**: Key price levels that may influence future price movements
 ```
 
 ## API Management

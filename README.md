@@ -3,6 +3,9 @@
 # Smart Duck
 Fast, precise, and intelligent AI-native trading agent, built on DuckChain network.
 
+## Smart Contract
+- Deployed on Duckchain Mainnet at [0x0187e591daf84909be74d0c6e5e18efaafcd42ce](https://web3.okx.com/explorer/duckchain/address/0x0187e591daf84909be74d0c6e5e18efaafcd42ce)
+
 ## Relevant Links:
 - Website: https://smartduck.hesameri.com
 - Telegram Bot: http://t.me/smart_duckchain_bot

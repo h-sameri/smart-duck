@@ -104,12 +104,12 @@ export default function HomePage() {
                             </div>
                             <div className="flex items-center gap-6 text-sm">
                                 <a
-                                    href="https://x.com/"
+                                    href="https://github.com/h-sameri/smart-duck"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-primary flex items-center gap-2 transition-colors"
                                 >
-                                    <Image src={!isDark ? "/static/images/x.svg" : "/static/images/x_light.png"} alt="X" className="size-4 hover:scale-110 transition-transform" />
+                                    GitHub Repository
                                 </a>
 
                                 <Link

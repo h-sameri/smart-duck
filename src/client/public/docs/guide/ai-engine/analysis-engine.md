@@ -2,13 +2,15 @@
 
 ## Trading Decision Generation
 
-The core AI analysis transforms market data into actionable trading recommendations using sophisticated prompting and structured output generation.
+The core AI analysis transforms market data into actionable trading recommendations using sophisticated prompting and structured output generation. This system serves as the primary decision-making component that evaluates cryptocurrency market conditions and provides specific trade instructions.
+
+The engine processes historical price data, technical indicators, and market sentiment to generate comprehensive trading decisions with risk management parameters. It ensures consistency in recommendations by enforcing a standardized output format through Zod schemas.
 
 ```typescript
 const TradeDecisionSchema = z.object({
   token: z.string(),
   sl: z.number(),           // Stop Loss
-  tp: z.number(),           // Take Profit  
+  tp: z.number(),           // Take Profit
   entry: z.number(),        // Entry Price
   currentPrice: z.number(),
   message: z.string(),
@@ -17,7 +19,7 @@ const TradeDecisionSchema = z.object({
 });
 
 async makeTradeDecision(
-  ticker: string, 
+  ticker: string,
   priceHistory: PriceDataPoint[]
 ): Promise<TradeDecision> {
   const systemPrompt = this.buildTradingPrompt(ticker, priceHistory);
@@ -32,9 +34,19 @@ async makeTradeDecision(
 }
 ```
 
+
 ### Advanced Analysis Features
 
 #### Technical Indicators
+The system employs a comprehensive suite of technical indicators to analyze price movements and market trends. These indicators provide quantitative signals that help identify potential entry and exit points, trend direction, and momentum changes.
+
+The implemented indicators include:
+- **SMA7**: 7-day Simple Moving Average for identifying short-term trends
+- **Volatility**: Measures price fluctuations to assess risk levels
+- **Momentum**: Detects the speed and strength of price movements
+- **Support Level**: Identifies key price levels where buying pressure may increase
+- **Resistance Level**: Identifies key price levels where selling pressure may increase
+
 ```typescript
 calculateTechnicalIndicators(priceHistory: PriceDataPoint[]) {
   return {
@@ -48,6 +60,14 @@ calculateTechnicalIndicators(priceHistory: PriceDataPoint[]) {
 ```
 
 #### Risk Assessment
+The risk assessment module evaluates potential trading opportunities by analyzing multiple risk factors to provide a comprehensive risk profile. This process helps traders make informed decisions by quantifying the risks associated with each trade recommendation.
+
+Key risk factors evaluated include:
+- **Volatility**: Measures price fluctuations and market uncertainty
+- **Liquidity**: Assesses how easily a token can be bought or sold without affecting its price
+- **Correlation**: Analyzes relationships between different tokens to understand portfolio risk
+- **Market Sentiment**: Evaluates overall market mood and trader psychology
+
 ```typescript
 async assessRisk(decision: TradeDecision): Promise<RiskMetrics> {
   const riskFactors = {
@@ -63,7 +83,9 @@ async assessRisk(decision: TradeDecision): Promise<RiskMetrics> {
 
 ## Generic Advice System
 
-For queries without specific tickers, the system provides market-wide analysis and general trading guidance.
+For queries without specific tickers, the system provides market-wide analysis and general trading guidance. This functionality serves as a comprehensive market overview tool that helps traders understand broader market conditions and identify potential opportunities across the entire cryptocurrency ecosystem.
+
+The generic advice system aggregates data from multiple tokens and market indicators to provide holistic insights. It's particularly useful for traders who want to understand overall market sentiment, identify trending sectors, or get general guidance without specifying individual assets.
 
 ```typescript
 const GenericAdviceSchema = z.object({
@@ -103,7 +125,9 @@ async provideGenericAdvice(
 
 ### TradingAgentAdvanced Class
 
-The advanced agent extends the base agent with sophisticated analysis capabilities for professional traders.
+The advanced agent extends the base agent with sophisticated analysis capabilities for professional traders. This enhanced version provides deeper technical insights, portfolio optimization features, and more comprehensive risk management tools compared to the standard trading agent.
+
+The advanced agent is designed for experienced traders who require detailed market analysis and sophisticated portfolio management capabilities. It incorporates multiple advanced analytical techniques that go beyond basic technical indicators to provide comprehensive trading insights.
 
 ```typescript
 export class TradingAgentAdvanced extends Agent {
@@ -132,12 +156,13 @@ export class TradingAgentAdvanced extends Agent {
 ```
 
 ### Advanced Features
-- **Technical Indicators**: RSI, MACD, Bollinger Bands, Fibonacci
-- **Portfolio Theory**: Modern portfolio optimization
-- **Risk Management**: Advanced risk/reward calculations
-- **Backtesting**: Historical strategy validation
-- **Multi-Timeframe Analysis**: Short, medium, and long-term perspectives
+The advanced trading agent includes several sophisticated features designed for professional traders:
 
+- **Technical Indicators**: RSI (Relative Strength Index), MACD (Moving Average Convergence Divergence), Bollinger Bands, and Fibonacci retracement levels for comprehensive market analysis
+- **Portfolio Theory**: Implementation of modern portfolio theory for optimal asset allocation and risk management
+- **Risk Management**: Advanced risk/reward calculations including Value at Risk (VaR) and other sophisticated metrics
+- **Backtesting**: Historical strategy validation to test trading strategies against past market data
+- **Multi-Timeframe Analysis**: Short, medium, and long-term perspectives to provide a complete market view
 ## Strategy Development
 
 ```typescript

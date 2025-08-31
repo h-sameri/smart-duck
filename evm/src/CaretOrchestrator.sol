@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./CaretEscrow.sol";
-import "./TestToken.sol";
+import "./Token.sol";
 
 contract CaretOrchestrator {
     address public server;
@@ -35,7 +35,7 @@ contract CaretOrchestrator {
         string memory name,
         string memory symbol
     ) external onlyServer returns (address) {
-        address token = address(new TestToken(name, symbol, address(usdt)));
+        address token = address(new Token(name, symbol, address(usdt)));
         tokens[symbol] = token;
         return token;
     }

@@ -12,6 +12,9 @@ export async function deriveActor(seed: string) {
   const hash = keccak256(toBytes(seed));
   const pvtKey = hash as `0x${string}`;
 
+  console.log('pvtKey:')
+  console.log(pvtKey);
+
   return createWalletClient({
     chain: primaryChain,
     account: privateKeyToAccount(pvtKey),

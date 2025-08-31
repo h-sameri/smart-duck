@@ -188,6 +188,7 @@ export class Agent {
       
       If no specific token is mentioned, suggest the most relevant one based on context.
       If multiple tokens are mentioned, pick the primary one for trading.
+      Never suggest trading USDT or USDC or any fiat currency.
       
       Remember: w(wrapped) tokens may be referred to by their original name.`,
     });

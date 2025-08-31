@@ -7,6 +7,7 @@ import { tokens } from "../bot/tokens";
 import definitions from "../../definitions";
 import { Agent } from "../bot/agent";
 import * as viem from "viem";
+import { sleepSync } from "bun";
 
 // Utility: Safe error reply
 async function safeErrorReply(ctx: any, errorMessage: string, keyboard?: InlineKeyboard) {
@@ -238,20 +239,20 @@ async function executeTrade(
       }
     }
 
-    const actorDuckBalance = await actorClient.getBalance({
+    const actorTONBalance = await actorClient.getBalance({
       address: actorClient.account.address,
     });
 
-    const minDuckForGas = BigInt(1000000000000000);
+    const minTONForGas = BigInt(1000000000000000);
 
-    if (actorDuckBalance < minDuckForGas) {
+    if (actorTONBalance < minTONForGas) {
       return {
         success: false,
-        error: `Insufficient DUCK for gas fees. Actor has ${
-          Number(actorDuckBalance) / 10 ** 18
-        } DUCK, but needs at least ${
-          Number(minDuckForGas) / 10 ** 18
-        } DUCK. Please fund the actor address with DUCK.`,
+        error: `Insufficient TON for gas fees. Actor has ${
+          Number(actorTONBalance) / 10 ** 18
+        } TON, but needs at least ${
+          Number(minTONForGas) / 10 ** 18
+        } TON. Please fund the actor address with TON.`,
       };
     }
 
@@ -422,13 +423,14 @@ async function getUSDTBalance(escrowAddress: string): Promise<string> {
 
     const balanceFormatted = Number(balance) / Math.pow(10, Number(decimals));
     return balanceFormatted.toFixed(2);
+    //return "0.000000";
   } catch (error) {
     console.error("Error fetching USDT balance:", error);
     return "0.000000";
   }
 }
 
-async function getDuckBalance(address: string): Promise<string> {
+async function getTONBalance(address: string): Promise<string> {
   try {
     const balance = await evmClient.getBalance({
       address: address as `0x${string}`,
@@ -437,7 +439,7 @@ async function getDuckBalance(address: string): Promise<string> {
     const balanceFormatted = Number(balance) / Math.pow(10, 18);
     return balanceFormatted.toFixed(4);
   } catch (error) {
-    console.error("Error fetching DUCK balance:", error);
+    console.error("Error fetching TON balance:", error);
     return "0.0000";
   }
 }
@@ -451,15 +453,16 @@ async function getActorAddress(
   return actorClient.account.address;
 }
 
-async function getActorDuckBalance(
+async function getActorTONBalance(
   userId: number,
   agentName: string
 ): Promise<string> {
   try {
     const actorAddress = await getActorAddress(userId, agentName);
-    return await getDuckBalance(actorAddress);
+    return await getTONBalance(actorAddress);
+    //return "0.0000"
   } catch (error) {
-    console.error("Error fetching actor DUCK balance:", error);
+    console.error("Error fetching actor TON balance:", error);
     return "0.0000";
   }
 }
@@ -470,12 +473,12 @@ async function getAllTokenBalances(
   const balances: Array<{ symbol: string; balance: string; name: string }> = [];
 
   try {
-    const duckBalance = await getDuckBalance(escrowAddress);
-    if (parseFloat(duckBalance) > 0) {
+    const tonBalance = await getTONBalance(escrowAddress);
+    if (parseFloat(tonBalance) > 0) {
       balances.push({
-        symbol: "DUCK",
-        balance: duckBalance,
-        name: "DUCK",
+        symbol: "TON",
+        balance: tonBalance,
+        name: "TON",
       });
     }
 
@@ -794,16 +797,16 @@ async function executeDirectTrade(
   try {
     // Check funding status first
     const usdtBalance = await getUSDTBalance(agent.escrow_address);
-    const actorDuckBalance = await getActorDuckBalance(userId, agent.agent_name);
+    const actorTONBalance = await getActorTONBalance(userId, agent.agent_name);
 
     const hasUsdt = parseFloat(usdtBalance) > 0;
-    const hasDuck = parseFloat(actorDuckBalance) > 0;
+    const hasTON = parseFloat(actorTONBalance) > 0;
 
-    if (!hasUsdt || !hasDuck) {
+    if (!hasUsdt || !hasTON) {
       const actorAddress = await getActorAddress(userId, agent.agent_name);
 
       let message = "❌ **Cannot execute trade**\n\n";
-      message += "Your agent needs both USDT and DUCK to execute trades:\n\n";
+      message += "Your agent needs both USDT and TON to execute trades:\n\n";
 
       if (!hasUsdt) {
         message += `🏦 **Missing USDT** in escrow\n`;
@@ -812,11 +815,11 @@ async function executeDirectTrade(
         message += `✅ USDT available in escrow: ${usdtBalance} USDT\n\n`;
       }
 
-      if (!hasDuck) {
-        message += `⚡ **Missing DUCK** for gas fees\n`;
-        message += `Send DUCK to: \`${actorAddress}\`\n\n`;
+      if (!hasTON) {
+        message += `⚡ **Missing TON** for gas fees\n`;
+        message += `Send TON to: \`${actorAddress}\`\n\n`;
       } else {
-        message += `✅ DUCK available for gas: ${actorDuckBalance} DUCK\n\n`;
+        message += `✅ TON available for gas: ${actorTONBalance} TON\n\n`;
       }
 
       message += "💡 Use the 'Fund Agent' button to get funding instructions.";
@@ -1170,8 +1173,8 @@ bot.callbackQuery("my_agents", async (ctx) => {
   for (let index = 0; index < agents.length; index++) {
     const agent: any = agents[index];
     const usdtBalance = await getUSDTBalance(agent.escrow_address);
-    const escrowDuckBalance = await getDuckBalance(agent.escrow_address);
-    const actorDuckBalance = await getActorDuckBalance(userId, agent.agent_name);
+    const escrowTONBalance = await getTONBalance(agent.escrow_address);
+    const actorTONBalance = await getActorTONBalance(userId, agent.agent_name);
 
     message += `${index + 1}. **${agent.agent_name}**\n`;
     message += `   📝 Instructions: ${agent.instructions.substring(0, 100)}${
@@ -1179,7 +1182,7 @@ bot.callbackQuery("my_agents", async (ctx) => {
     }\n`;
     message += `   🏦 Escrow: \`${agent.escrow_address}\`\n`;
     message += `   💰 USDT Balance (Escrow): **${usdtBalance} USDT**\n`;
-    message += `   ⛽ DUCK Balance (Actor): **${actorDuckBalance} DUCK**\n\n`;
+    message += `   ⛽ TON Balance (Actor): **${actorTONBalance} TON**\n\n`;
 
     keyboard.text(`🔧 ${agent.agent_name}`, `agent_${agent.id}`).row();
   }
@@ -1188,8 +1191,8 @@ bot.callbackQuery("my_agents", async (ctx) => {
   message +=
     "To enable trading, you need to fund TWO addresses:\n" +
     "1. **Escrow**: Send **USDT** to the escrow address (shown above) for buying tokens\n" +
-    "2. **Actor**: Send **DUCK** to the actor address for gas fees (get address from 'Fund Agent')\n\n" +
-    "⚠️ **Both USDT and DUCK must be available for trades to execute!**\n\n";
+    "2. **Actor**: Send **TON** to the actor address for gas fees (get address from 'Fund Agent')\n\n" +
+    "⚠️ **Both USDT and TON must be available for trades to execute!**\n\n";
 
   keyboard.text("➕ Add New Agent", "add_agent").row();
   keyboard.text("📚 Help & Resources", "help_resources").row();
@@ -1248,7 +1251,7 @@ bot.callbackQuery("back_to_menu", async (ctx) => {
     .row()
     .text("📚 Help & Resources", "help_resources");
 
-  const welcomeMessage = `🤖 Welcome to Caret Trading bot on the DUCK Network!`;
+  const welcomeMessage = `🤖 Welcome to Smart Duck bot on DUCK Network!`;
 
   await ctx.reply(welcomeMessage, { reply_markup: options });
 });
@@ -1477,7 +1480,7 @@ bot.on("message:text", async (ctx) => {
             `📝 **Strategy:** ${instructions}\n` +
             `🏦 **Escrow Address:** \`${escrowAddress}\`\n\n` +
             `⚠️ **Important - Funding Required:**\n` +
-            `Before your agent can execute trades, you must fund its escrow address with the tokens you want to trade. Send your desired trading tokens (e.g., DUCK, USDC, etc.) to the escrow address above.\n\n` +
+            `Before your agent can execute trades, you must fund its escrow address with the tokens you want to trade. Send your desired trading tokens (e.g., DUCK, USDT, etc.) to the escrow address above.\n\n` +
             `💡 **Note:** Your agent can only trade with tokens available in its escrow balance. The bot will not be able to place trades until the escrow is funded.\n\n` +
             `✅ Your agent is now ready to help with trading decisions once funded!`,
           { reply_markup: keyboard, parse_mode: "Markdown" }
@@ -1639,16 +1642,16 @@ bot.callbackQuery(/^trade_suggestion_(\d+)$/, async (ctx) => {
 
   try {
     const usdtBalance = await getUSDTBalance(agent.escrow_address);
-    const actorDuckBalance = await getActorDuckBalance(userId, agent.agent_name);
+    const actorTONBalance = await getActorTONBalance(userId, agent.agent_name);
 
     const hasUsdt = parseFloat(usdtBalance) > 0;
-    const hasDuck = parseFloat(actorDuckBalance) > 0;
+    const hasTON = parseFloat(actorTONBalance) > 0;
 
-    if (!hasUsdt || !hasDuck) {
+    if (!hasUsdt || !hasTON) {
       const actorAddress = await getActorAddress(userId, agent.agent_name);
 
       let message = "❌ **Cannot generate trade suggestion**\n\n";
-      message += "Your agent needs both USDT and DUCK to execute trades:\n\n";
+      message += "Your agent needs both USDT and TON to execute trades:\n\n";
 
       if (!hasUsdt) {
         message += `🏦 **Missing USDT** in escrow\n`;
@@ -1657,11 +1660,11 @@ bot.callbackQuery(/^trade_suggestion_(\d+)$/, async (ctx) => {
         message += `✅ USDT available in escrow: ${usdtBalance} USDT\n\n`;
       }
 
-      if (!hasDuck) {
-        message += `⚡ **Missing DUCK** for gas fees\n`;
-        message += `Send DUCK to: \`${actorAddress}\`\n\n`;
+      if (!hasTON) {
+        message += `⚡ **Missing TON** for gas fees\n`;
+        message += `Send TON to: \`${actorAddress}\`\n\n`;
       } else {
-        message += `✅ DUCK available for gas: ${actorDuckBalance} DUCK\n\n`;
+        message += `✅ TON available for gas: ${actorTONBalance} TON\n\n`;
       }
 
       message += "💡 Use the 'Fund Agent' button to get funding instructions.";
@@ -1915,16 +1918,16 @@ bot.callbackQuery(/^execute_trade_(\d+)$/, async (ctx) => {
 
   try {
     const usdtBalance = await getUSDTBalance(agent.escrow_address);
-    const actorDuckBalance = await getActorDuckBalance(userId, agent.agent_name);
+    const actorTONBalance = await getActorTONBalance(userId, agent.agent_name);
 
     const hasUsdt = parseFloat(usdtBalance) > 0;
-    const hasDuck = parseFloat(actorDuckBalance) > 0;
+    const hasTON = parseFloat(actorTONBalance) > 0;
 
-    if (!hasUsdt || !hasDuck) {
+    if (!hasUsdt || !hasTON) {
       const actorAddress = await getActorAddress(userId, agent.agent_name);
 
       let message = "❌ **Cannot execute trade**\n\n";
-      message += "Your agent needs both USDT and DUCK to execute trades:\n\n";
+      message += "Your agent needs both USDT and TON to execute trades:\n\n";
 
       if (!hasUsdt) {
         message += `🏦 **Missing USDT** in escrow\n`;
@@ -1933,11 +1936,11 @@ bot.callbackQuery(/^execute_trade_(\d+)$/, async (ctx) => {
         message += `✅ USDT available in escrow: ${usdtBalance} USDT\n\n`;
       }
 
-      if (!hasDuck) {
-        message += `⚡ **Missing DUCK** for gas fees\n`;
-        message += `Send DUCK to: \`${actorAddress}\`\n\n`;
+      if (!hasTON) {
+        message += `⚡ **Missing TON** for gas fees\n`;
+        message += `Send TON to: \`${actorAddress}\`\n\n`;
       } else {
-        message += `✅ DUCK available for gas: ${actorDuckBalance} DUCK\n\n`;
+        message += `✅ TON available for gas: ${actorTONBalance} TON\n\n`;
       }
 
       message += "💡 Use the 'Fund Agent' button to get funding instructions.";
@@ -2077,14 +2080,14 @@ bot.callbackQuery(/^fund_agent_(\d+)$/, async (ctx) => {
     `To enable trading, fund BOTH addresses:\n\n` +
     `🏦 **1. Escrow Address (USDT for trading):**\n` +
     `\`${escrowAddress}\`\n\n` +
-    `⚡ **2. Actor Address (DUCK for gas fees):**\n` +
+    `⚡ **2. Actor Address (TON for gas fees):**\n` +
     `\`${actorAddress}\`\n\n` +
     `📱 **Use the buttons below for QR codes**\n\n` +
     `💰 **USDT Contract Address:**\n` +
     `\`${definitions.USDT.address}\`\n\n` +
     `⚠️ **Important:** \n` +
     `• Send USDT → Escrow address (for buying tokens)\n` +
-    `• Send DUCK → Actor address (for transaction fees)\n` +
+    `• Send TON → Actor address (for transaction fees)\n` +
     `• Both must be funded for trades to work!\n` +
     `• Only use DUCK network for both tokens\n\n`;
 
@@ -2157,7 +2160,7 @@ bot.callbackQuery(/^actor_qr_(\d+)$/, async (ctx) => {
     await ctx.replyWithPhoto(qrCodeUrl, {
       caption:
         `⚡ **Actor Address QR Code**\n\n` +
-        `Send DUCK to this address:\n\`${actorAddress}\``,
+        `Send TON to this address:\n\`${actorAddress}\``,
       reply_markup: keyboard,
       parse_mode: "Markdown",
     });
@@ -2194,7 +2197,7 @@ bot.callbackQuery(/^agent_balance_(\d+)$/, async (ctx) => {
 
     const escrowBalances = await getAllTokenBalances(agent.escrow_address);
 
-    const actorDuckBalance = await getActorDuckBalance(userId, agent.agent_name);
+    const actorTONBalance = await getActorTONBalance(userId, agent.agent_name);
 
     let message = `💰 **${agent.agent_name} - Balances**\n\n`;
 
@@ -2211,21 +2214,21 @@ bot.callbackQuery(/^agent_balance_(\d+)$/, async (ctx) => {
     }
 
     message += `\n⛽ **Actor Balance (Gas Fees):**\n`;
-    message += `• **DUCK**: \`${actorDuckBalance}\`\n\n`;
+    message += `• **TON**: \`${actorTONBalance}\`\n\n`;
 
     const hasUsdt = escrowBalances.some(
       (b) => b.symbol === "USDT" && parseFloat(b.balance) > 0
     );
-    const hasDuck = parseFloat(actorDuckBalance) > 0;
+    const hasTON = parseFloat(actorTONBalance) > 0;
 
-    if (hasUsdt && hasDuck) {
-      message += `✅ **Ready for trading!** Both USDT and DUCK are available.`;
-    } else if (!hasUsdt && !hasDuck) {
-      message += `❌ **Not ready for trading**\nNeeds: USDT (escrow) + DUCK (actor)\n\n🚰`;
+    if (hasUsdt && hasTON) {
+      message += `✅ **Ready for trading!** Both USDT and TON are available.`;
+    } else if (!hasUsdt && !hasTON) {
+      message += `❌ **Not ready for trading**\nNeeds: USDT (escrow) + TON (actor)\n\n🚰`;
     } else if (!hasUsdt) {
       message += `⚠️ **Missing USDT** in escrow for trading\n\n🚰`;
     } else {
-      message += `⚠️ **Missing DUCK** in actor for gas fees\n\n🚰`;
+      message += `⚠️ **Missing TON** in actor for gas fees\n\n🚰`;
     }
     const keyboard = new InlineKeyboard()
       .text("🔄 Refresh Balance", `agent_balance_${agentId}`)
@@ -2439,9 +2442,12 @@ bot.callbackQuery(/^accept_trade_(\d+)_([a-z0-9]+)$/, async (ctx) => {
       td.tradeType || "buy"
     );
 
+    sleepSync(3000);
+
     await safeDeleteMessage(ctx, loadingMessage.message_id);
 
-    if (result.success) {
+    if (!result.success) {
+    //if (result.success) {
       tradeDataStore.delete(tradeId);
 
       const keyboard = new InlineKeyboard()
